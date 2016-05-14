@@ -43,38 +43,43 @@ function! s:isStopperLine(line, col)
 endfunction
 
 function! Vertical(mode, dir, range)
+    call cursor(-1, -1)
+    if a:mode == 'v'
+        normal! `z
+    endif
+    let here = '.'
     normal! m`
+    let col = col(here)
+    let line = line(here)
+    let sign = 1
+    let flags = ''
+    if a:dir == 'b'
+        let sign = -1
+        let flags = 'b'
+    endif
     for _ in range(a:range)
-        let col = col('.')
-        let line = line('.')
-        let sign = 1
-        let flags = ''
-        if a:dir == 'b'
-            let sign = -1
-            let flags = 'b'
-        endif
-        if s:isEmptyBlockLine(line('.'), col)
+        if s:isEmptyBlockLine(line(here), col)
             call search(s:nonEmptyPattern(col), flags)
-            call cursor(line('.'), col)
-        elseif s:isStopperLine(line('.') + (1 * sign), col)
-            call cursor(line('.') + (1 * sign), col)
+            call cursor(line(here), col)
+        elseif s:isStopperLine(line(here) + (1 * sign), col)
+            call cursor(line(here) + (1 * sign), col)
             call search(s:nonStopperPattern(col), flags)
-            call cursor(line('.'), col)
+            call cursor(line(here), col)
         else
             call search(s:stopperPattern(col) . '\|^$', flags)
-            call cursor(line('.') - (1 * sign), col)
-        endif
-        if line('.') > line && a:dir == 'b'
-            normal! gg
-            call cursor(line('.'), col)
-        elseif line('.') < line && a:dir != 'b'
-            normal! G
-            call cursor(line('.'), col)
-        endif
-        if a:mode == 'v' || a:mode == 'V' || a:mode == ''
-            normal! mzgv`z
+            call cursor(line(here) - (1 * sign), col)
         endif
     endfor
+    if line(here) > line && a:dir == 'b'
+        normal! gg
+        call cursor(line(here), col)
+    elseif line(here) < line && a:dir != 'b'
+        normal! G
+        call cursor(line(here), col)
+    endif
+    if a:mode == 'v' || a:mode == 'V' || a:mode == ''
+        normal! mzgv`z
+    endif
 endfunction
 
 command! -range -nargs=1 Vertical call Vertical('n', <f-args>, (<line2> - <line1> + 1))
