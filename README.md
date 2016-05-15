@@ -3,6 +3,20 @@
 vim-vertical is a way to get around in vim vertically the same way you do
 horizontally.
 
+## usage
+
+To go down...
+
+```
+:[range]Vertical f
+```
+
+To go up...
+
+```
+:[range]Vertical b
+```
+
 ## example
 
 The cursor is marked by █.
